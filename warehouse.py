@@ -14,11 +14,10 @@ class Warehouse:
                          Keys are product names, and values are dictionaries with keys
                          'quantity' and 'price' representing the quantity and price of the product.
         logged_in_user (str): Stores the username of the currently logged-in user.
-
     """
     def __init__(self):
-        self.inventory = {}
         self.logged_in_user = None
+        self.inventory = {}
 
     def login(self, username, password):
         """Log in to the warehouse management system.
@@ -27,19 +26,17 @@ class Warehouse:
         It checks if the provided credentials match 'admin' and '553355' for successful login.
         """
         if username == 'admin' and password == '553355':
+            print('Login successful.')
             self.logged_in_user = username
-            self.load_inventory_from_db()
+            self.load_inventory_from_database()
             self.warehouse_menu()
-            if self.logged_in_user:
-                print('Login successful.')
-            return
         else:
             print('Login failed.')
 
     def logout(self):
         self.logged_in_user = None
 
-    def initialize_database(self):
+    def initialize_databse(self):
         """
         Initialize the SQLite database for the inventory.
 
@@ -49,13 +46,12 @@ class Warehouse:
         with sqlite3.connect('warehouse.db') as connection:
             cursor = connection.cursor()
             cursor.execute('''
-            CREATE TABLE IF NOT EXISTS inventory (
-            product_name TEXT PRIMARY KEY,
-            quantity INTEGER,
-            price REAL
-            )''')
+            CREATE TABLE IF NOT EXISTS inventory(
+                product_name TEXT PRIMARY KEY,
+                quantity INTEGER,
+                price REAL)''')
 
-    def save_inventory_to_db(self):
+    def save_inventory_to_database(self):
         """
        Save the current inventory to the SQLite database.
 
@@ -63,12 +59,13 @@ class Warehouse:
        """
         with sqlite3.connect('warehouse.db') as connection:
             cursor = connection.cursor()
-            cursor.execute('DELETE FROM inventory')
+            cursor.execute("DELETE FROM inventory")
             for product_name, product_info in self.inventory.items():
-                cursor.execute('''INSERT INTO inventory (product_name, quantity, price) VALUES (?, ?, ?)''',
-                                (product_name, product_info['quantity'], product_info['price']))
+                cursor.execute('''
+                INSERT INTO inventory (product_name, quantity, price) VALUES (?, ?, ?)''',
+                               (product_name, product_info['quantity'], product_info['price']))
 
-    def load_inventory_from_db(self):
+    def load_inventory_from_database(self):
         """
         Load the product inventory from the SQLite database.
 
@@ -79,82 +76,81 @@ class Warehouse:
         """
         with sqlite3.connect('warehouse.db') as connection:
             cursor = connection.cursor()
-
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='inventory'")
             table_exists = cursor.fetchone()
+
             if not table_exists:
-                self.initialize_database()
+                self.initialize_databse()
                 return
 
             cursor.execute('SELECT * FROM inventory')
             rows = cursor.fetchall()
-            self.inventory = {}
             for row in rows:
                 product_name, quantity, price = row
                 self.inventory[product_name] = {'quantity': quantity, 'price': price}
 
-    def receive_product(self):
+    def receive_product(self, product_name=None, quantity=None, price=None):
         """Receive a product into the warehouse.
 
         This method allows the user to add products to the inventory.
         It prompts for the product name, quantity, and price, and performs validation checks.
         """
         while True:
-            product_name = input('Enter product name or press "x" to exit: ')
-            if product_name.lower() == 'x':
-                return
-            try:
-                quantity = int(input('Enter quantity: '))
-                price = float(input('Enter price: '))
-                if quantity <= 0 or price <= 0:
-                    print('Error. Quantity and price should be a positive value.')
-                    continue
-            except ValueError:
-                print('Wrong format. Quantity should be an integer and price should be a float.')
-                continue
-
-            if product_name in self.inventory:
-                self.inventory[product_name]['quantity'] += quantity
-            else:
-                self.inventory[product_name] = {'quantity': quantity, 'price': price}
-
-            print(f'{quantity} x {product_name} added.')
-
-            while True:
-                choice = input('Add another product? y/n: ').lower()
-                if choice == 'y':
-                    break
-                elif choice == 'n':
+            if product_name is None or quantity is None or price is None:
+                product_name = input('Enter product name or press "x" to exit: ')
+                if product_name.lower() == 'x':
                     return
-                else:
-                    print('Wrong choice.')
+                try:
+                    quantity = int(input('Enter quantity: '))
+                    price = float(input('Enter price: '))
+                    if quantity <= 0 or price <= 0:
+                        print('Error. Quantity and price should be a positive value.')
+                        continue
+                except ValueError:
+                    print('Wrong format. Quantity should be an integer and price should be a float.')
+                    continue
+            break
 
-    def issue_product(self):
+        quantity, price = int(quantity), float(price)
+
+        if product_name in self.inventory:
+            self.inventory[product_name]['quantity'] += quantity
+        else:
+            self.inventory[product_name] = {'quantity': quantity, 'price': price}
+
+        print(f'{quantity} x {product_name} added.')
+
+    def issue_product(self, product_name=None, quantity=None):
         """Issue a product from the warehouse.
 
         This method allows the user to remove products from the inventory.
         It prompts for the product name and quantity, performs validation checks, and updates the inventory.
         """
-        while True:
-            if not self.inventory:
-                print('Warehouse empty.')
-                return
-            self.display_product_list()
-            product_name = input('Enter product name or press "x" to exit: ')
-            if product_name.lower() == 'x':
-                return
-            elif product_name not in self.inventory:
-                print('Product not found in inventory.')
-                continue
-            try:
-                quantity = int(input('Enter quantity: '))
-                if quantity <= 0:
-                    print('Error. Quantity should be a positive value.')
-            except ValueError:
-                print('Wrong format. Quantity should be an integer.')
-                continue
 
-            if self.inventory[product_name]['quantity'] >= quantity:
+        while True:
+            if product_name is None or quantity is None:
+                if not self.inventory:
+                    print('Warehouse is empty.')
+                    return
+                self.display_product_list()
+                product_name = input('Enter product name or press "x" to exit: ')
+                if product_name.lower() == 'x':
+                    return
+                elif product_name not in self.inventory:
+                    print('Product not found in inventory.')
+                    continue
+                try:
+                    quantity = int(input('Enter quantity: '))
+                    if quantity <= 0:
+                        print('Error. Quantity should be a positive value.')
+                        continue
+                except ValueError:
+                    print('Error. Quantity should be an integer.')
+                    continue
+
+            quantity = int(quantity)
+
+            if product_name in self.inventory and self.inventory[product_name]['quantity'] >= quantity:
                 if self.inventory[product_name]['quantity'] > quantity:
                     self.inventory[product_name]['quantity'] -= quantity
                 else:
@@ -162,15 +158,7 @@ class Warehouse:
                 print(f'{quantity} x {product_name} issued.')
             else:
                 print('Insufficient stock.')
-
-            while True:
-                choice = input('Remove another product? y/n: ').lower()
-                if choice == 'y':
-                    break
-                elif choice == 'n':
-                    return
-                else:
-                    print('Wrong choice.')
+            break
 
     def save_inventory_to_file(self):
         """Save the inventory to a JSON file.
@@ -186,8 +174,7 @@ class Warehouse:
                 json.dump(self.inventory, file)
         except Exception as e:
             print(f'Error: {e}')
-        else:
-            print(f'Inventory saved to {filename}')
+        print(f'Inventory saved to {filename}.')
 
     def load_inventory_from_file(self):
         """Load the inventory from a JSON file.
@@ -207,7 +194,7 @@ class Warehouse:
         except Exception as e:
             print(f'Error: {e}')
         else:
-            print(f'Inventory loaded from {filename}')
+            print(f'Inventory loaded from {filename}.')
 
     def display_product_list(self):
         """Display the list of products in the inventory.
@@ -218,10 +205,10 @@ class Warehouse:
             print('Product list:')
             print(30 * '=')
             for product_name, product_info in self.inventory.items():
-                print(f'{product_name:7} - Quantity: {product_info["quantity"]:3}, Price: ${product_info["price"]:3}')
+                print(f'{product_name:6} - Quantity: {product_info["quantity"]:2}, Price: ${product_info["price"]:4}')
             print(30 * '=')
         else:
-            print('The warehouse is empty.')
+            print('Warehouse is empty.')
 
     def warehouse_menu(self):
         """Manage the warehouse operations.
@@ -246,7 +233,7 @@ class Warehouse:
             elif choice == '6':
                 self.logout()
                 print('Logged out.')
-                self.save_inventory_to_db()
+                self.save_inventory_to_database()
                 return
             else:
                 print('Wrong choice.')

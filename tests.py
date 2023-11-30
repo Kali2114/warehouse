@@ -32,6 +32,11 @@ class TestWarehouse(unittest.TestCase):
         with patch('builtins.input', return_value='test_inventory.json'):
             self.warehouse.save_inventory_to_file()
 
+        with open('test_inventory.json', 'r') as file:
+            saved_data = json.load(file)
+
+        self.assertEqual(saved_data, self.warehouse.inventory)
+
 
     def test_load_inventory_from_file(self):
         test_data = {'product1': {'quantity': 5, 'price': 10.0}}
