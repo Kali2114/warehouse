@@ -51,6 +51,27 @@ To run the application, open a command prompt or terminal and navigate to the pr
 ```bash
 python main.py login --username=admin --password=553355
 ```
+
+## Using Methods Directly
+You can also use the application by directly invoking methods from the command line. For example:
+
+### Receive Product
+```bash
+Copy code
+python main.py receive_product --product_name=example_product --quantity=5 --price=10.0
+```
+### Issue Product
+```bash
+Copy code
+python main.py issue_product --product_name=example_product --quantity=3
+```
+### Display Product List
+```bash
+Copy code
+python main.py display_product_list
+```
+Note: Replace the placeholder values (example_product, 5, 10.0, etc.) with your actual data.
+
 ## Contributing
 
 Contributions to this project are welcome. Feel free to open issues and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
