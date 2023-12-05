@@ -111,8 +111,6 @@ class Warehouse:
                     continue
             break
 
-        quantity, price = int(quantity), float(price)
-
         if product_name in self.inventory:
             self.inventory[product_name]['quantity'] += quantity
         else:
@@ -147,8 +145,6 @@ class Warehouse:
                 except ValueError:
                     print('Error. Quantity should be an integer.')
                     continue
-
-            quantity = int(quantity)
 
             if product_name in self.inventory and self.inventory[product_name]['quantity'] >= quantity:
                 if self.inventory[product_name]['quantity'] > quantity:

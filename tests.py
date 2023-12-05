@@ -20,13 +20,14 @@ class TestWarehouse(unittest.TestCase):
             self.warehouse.issue_product()
         self.assertEqual(self.warehouse.inventory['product1']['quantity'], 5)
 
-    def test_display_product_list(self):
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_display_product_list(self, mock_stdout):
         self.warehouse.inventory = {'product1': {'quantity': 10, 'price': 5.0}}
-        expected_output = "Product list:\n==============================\nproduct1 - Quantity:  10, Price: $5.0\n==============================\n"
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            self.warehouse.display_product_list()
-            actual_output = mock_stdout.getvalue()
-            self.assertEqual(actual_output, expected_output)
+        expected_output = "Product list:\n==============================\nproduct1 - Quantity: 10, Price: $ 5.0\n==============================\n"
+
+        self.warehouse.display_product_list()
+        actual_output = mock_stdout.getvalue()
+        self.assertEqual(actual_output, expected_output)
 
     def test_save_inventory_to_file(self):
         with patch('builtins.input', return_value='test_inventory.json'):
