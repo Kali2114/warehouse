@@ -34,7 +34,6 @@ def test_display_product_list(capfd, warehouse):
 def test_save_inventory_to_file(tmp_path, warehouse, monkeypatch):
     test_file_path = tmp_path / 'test_inventory.json'
 
-    # Przechwytujemy input, dostarczając poprawne dane
     with monkeypatch.context() as m:
         m.setattr('builtins.input', lambda _: str(test_file_path))
         warehouse.save_inventory_to_file()
@@ -51,7 +50,6 @@ def test_load_inventory_from_file(tmp_path, warehouse, monkeypatch):
     with open(test_file_path, 'w') as file:
         json.dump(test_data, file)
 
-    # Przechwytujemy input, dostarczając poprawne dane
     with monkeypatch.context() as m:
         m.setattr('builtins.input', lambda _: str(test_file_path))
         warehouse.load_inventory_from_file()
